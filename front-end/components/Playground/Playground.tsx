@@ -7,6 +7,13 @@ import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from "@/components/ui/button";
 
 import {newSocket} from '@/actions/socket';
+import Console from '@/components/Console/Console';
+
+
+export type IOutput = {
+    chiave: 'message' | 'value',
+    valore: any
+}
 
 export default function Playground() {
     const [code, setCode] = React.useState<string>(`using System;    
@@ -19,6 +26,11 @@ class Program
     }
 }
 `);
+
+    const [consoleType, setConsoleType] = React.useState<boolean>(false);
+    const [output, setOutput] = React.useState<IOutput[]>([]);
+    const [error, setError] = React.useState<string>('');
+
 
     const monaco = useMonaco();
 
@@ -39,10 +51,10 @@ class Program
     return (
         <div className={'min-h-screen max-h-screen h-screen flex flex-col'}>
 
-            <header className={'p-4 border-b-2 flex items-center gap-2'}>
+            <header className={'p-2 border-b-2 flex items-center gap-2'}>
 
-                <Avatar className={'flex items-center gap-2'}>
-                    <AvatarImage src={'./Csharp.svg'} alt={'Csharp'} width={20} height={20}/>
+                <Avatar className={'h-8 w-8'}>
+                    <AvatarImage src={'./Csharp.svg'} alt={'Csharp'} width={16} height={16}/>
                     <AvatarFallback>C#</AvatarFallback>
                 </Avatar>
 
@@ -50,16 +62,17 @@ class Program
 
             </header>
 
-            <main className={'h-full p-4'}>
+            <main className={'h-full p-2'}>
 
-                <section className={'flex-1 p-4 flex flex-col gap-4 h-full'}>
+                <section className={'flex-1 flex flex-col gap-4 h-full'}>
 
                     <div className={'flex items-center justify-end gap-4'}>
 
                         <section className={'text-right'}>
 
                             <Button
-                                variant={"default"}
+                                size={'sm'}
+                                variant={'default'}
                                 onClick={() => handleSocketRunCode()}>
                                 Esegui
                             </Button>
@@ -68,15 +81,15 @@ class Program
 
                     </div>
 
-                    <div className={'h-[48rem] overflow-y-auto border border-gray-300 rounded'}>
-
+                    <div className={'overflow-y-auto border border-gray-300 rounded'} style={{height: "100%"}}>
                         <Editor
                             options={{
                                 minimap:{enabled:false},
-                                fontSize: 20,
+                                fontSize: 16,
                                 contextmenu: false,
                                 cursorWidth: 6,
-                                quickSuggestions: false
+                                quickSuggestions: false,
+
                             }}
 
                             width="100%"
@@ -91,6 +104,15 @@ class Program
                         />
 
                     </div>
+
+                    <Console
+                        consoleType={consoleType}
+                        setConsoleType={setConsoleType}
+                        output={output}
+                        setOutput={setOutput}
+                        error={error}
+                        setError={setError}
+                    />
 
                 </section>
             </main>
