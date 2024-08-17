@@ -8,6 +8,7 @@ import {Button} from "@/components/ui/button";
 
 import {newSocket} from '@/actions/socket';
 import Console from '@/components/Console/Console';
+import Menu from '@/components/Menu/Menu';
 
 
 export type IOutput = {
@@ -35,8 +36,8 @@ class Program
     const monaco = useMonaco();
 
     useEffect(() => {
-        if (monaco){
-            import('monaco-themes/themes/Twilight.json').then((theme:any) => {
+        if (monaco) {
+            import('monaco-themes/themes/Twilight.json').then((theme: any) => {
                 monaco.editor.defineTheme('twilight', theme);
                 monaco.editor.setTheme('twilight');
             })
@@ -66,32 +67,41 @@ class Program
 
                 <section className={'flex-1 flex flex-col gap-4 h-full'}>
 
-                    <div className={'flex items-center justify-end gap-4'}>
+                    <div className={"flex items-center justify-between gap-4"}>
 
-                        <section className={'text-right'}>
+                        <Menu
+                            onClickVoiceItem={(content) => setCode(content)}
+                            onUploadFile={(content, extensions) => setCode(content)}
+                            getCode={() => code}
+                        />
 
-                            <Button
-                                size={'sm'}
-                                variant={'default'}
-                                onClick={() => handleSocketRunCode()}>
-                                Esegui
-                            </Button>
+                        <div className={'flex items-center justify-end gap-4'}>
 
-                        </section>
+                            <section className={'text-right'}>
+
+                                <Button
+                                    size={'sm'}
+                                    variant={'default'}
+                                    onClick={() => handleSocketRunCode()}>
+                                    Esegui
+                                </Button>
+
+                            </section>
+
+                        </div>
 
                     </div>
 
                     <div className={'overflow-y-auto border border-gray-300 rounded'} style={{height: "100%"}}>
                         <Editor
                             options={{
-                                minimap:{enabled:false},
+                                minimap: {enabled: false},
                                 fontSize: 16,
                                 contextmenu: false,
                                 cursorWidth: 6,
                                 quickSuggestions: false,
 
                             }}
-
                             width="100%"
                             defaultLanguage={'csharp'}
                             value={code}
