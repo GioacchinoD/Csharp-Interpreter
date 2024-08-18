@@ -1,0 +1,86 @@
+// Importazione di componenti comuni
+%import common.CNAME -> IDENTIFIER
+%import common.NUMBER
+%import common.ESCAPED_STRING   // Importa il terminale ESCAPED_STRING
+%import common._STRING_INNER
+%import common.WS
+
+start: using_directive class_declaration*
+
+using_directive: "using" "System" ";"
+
+class_declaration: "class" IDENTIFIER "{" (main_declaration | method_declaration)* "}"
+
+main_declaration: "static" "void" "Main" "(" ")" block
+
+?block: "{" statement* "}"
+
+statement: var_decl
+         | var_assignment
+         | if_statement
+         | while_statement
+         | input_statement
+         | output_statement
+
+var_decl: data_type IDENTIFIER "=" (expr | bool_expr | input_statement) ";"
+         | data_type IDENTIFIER ";"
+         | data_type IDENTIFIER "=" method_call
+
+var_assignment: IDENTIFIER "=" (expr | bool_expr | input_statement) ";"
+
+
+!data_type: INT_TYPE | BOOL_TYPE | STRING_TYPE
+
+INT_TYPE: "int"
+BOOL_TYPE: "bool"
+STRING_TYPE: "string"
+
+expr: term
+     | expr "+" term    -> add
+     | expr "-" term    -> sub
+
+term: factor
+     | term "*" factor  -> mul
+     | term "/" factor  -> div
+     | term "%" factor  -> mod
+
+factor:  NUMBER
+       | IDENTIFIER
+       | STRING
+       | "(" expr ")"
+       | input_statement
+
+bool_expr: bool_term
+         | bool_expr "||" bool_expr -> lor
+         | bool_expr "&&" bool_expr -> land
+         | "!" bool_expr            -> lnot
+         | "(" bool_expr ")"
+
+bool_term: expr "==" expr            -> eq
+         | expr "!=" expr            -> neq
+         | expr "<" expr             -> lt
+         | expr ">" expr             -> gt
+         | expr "<=" expr            -> le
+         | expr ">=" expr            -> ge
+         | "false"                   -> false
+         | "true"                    -> true
+
+STRING: "\"" _STRING_INNER* "\""
+
+output_statement: "Console" "." "WriteLine" "(" expr* ")" ";"
+                 | "Console" "." "WriteLine" "(" bool_expr* ")" ";"
+                 | "Console" "." "WriteLine" "(" var_assignment ")" ";"
+
+
+input_statement:"Console"".""ReadLine" "(" ")"
+
+if_statement: "if" "(" (bool_expr|expr) ")" block ("else" (if_statement| block))?
+
+while_statement: "while" "(" bool_expr ")" block (break_statement)?
+
+MULTILINE_COMMENT: /\/\*(.|\n)*?\*\//
+INLINE_COMMENT: "//" /[^\n]*/
+
+%ignore WS
+%ignore INLINE_COMMENT
+%ignore MULTILINE_COMMENT
