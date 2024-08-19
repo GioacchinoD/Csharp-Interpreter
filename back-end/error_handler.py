@@ -40,3 +40,8 @@ class CsharpSemanticError(Exception):
 class UnsupportedOperationType(CsharpSemanticError):
     def __init__(self, type1, type2, operation):
         super().__init__(f"The operation '{operation}' is not supported by type '{type1}' and '{type2}'.")
+
+
+def op_type(items, operation):
+    if type(items[0]) != type(items[1]):
+        raise UnsupportedOperationType(type1=type(items[0]), type2=type(items[1]), operation=operation)

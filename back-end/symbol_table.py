@@ -43,3 +43,4 @@ class SymbolTable:
         """
         if identifier not in self.symbols:
             raise Exception(f"Errore: La variabile '{identifier}' non è definita.")
+        return self.symbols[identifier]['type']

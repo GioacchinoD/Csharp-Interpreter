@@ -9,7 +9,7 @@ start: using_directive class_declaration*
 
 using_directive: "using" "System" ";"
 
-class_declaration: "class" IDENTIFIER "{" (main_declaration | method_declaration)* "}"
+class_declaration: "class" IDENTIFIER "{" main_declaration "}"
 
 main_declaration: "static" "void" "Main" "(" ")" block
 
@@ -24,7 +24,7 @@ statement: var_decl
 
 var_decl: data_type IDENTIFIER "=" (expr | bool_expr | input_statement) ";"
          | data_type IDENTIFIER ";"
-         | data_type IDENTIFIER "=" method_call
+
 
 var_assignment: IDENTIFIER "=" (expr | bool_expr | input_statement) ";"
 
@@ -76,7 +76,7 @@ input_statement:"Console"".""ReadLine" "(" ")"
 
 if_statement: "if" "(" (bool_expr|expr) ")" block ("else" (if_statement| block))?
 
-while_statement: "while" "(" bool_expr ")" block (break_statement)?
+while_statement: "while" "(" bool_expr ")" block
 
 MULTILINE_COMMENT: /\/\*(.|\n)*?\*\//
 INLINE_COMMENT: "//" /[^\n]*/
