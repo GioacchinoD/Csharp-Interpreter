@@ -7,10 +7,6 @@ cd front-end
 
 # By default, all modules listed as dependencies in package.json will be installed.
 npm install
-
-```bash         
-# By default, all modules listed as dependencies in package.json will be installed.
-npm install
 ```
 
 ## Launching the front-end
