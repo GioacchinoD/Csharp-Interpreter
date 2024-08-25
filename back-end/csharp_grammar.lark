@@ -9,7 +9,7 @@ start: using_directive class_declaration*
 
 using_directive: "using" "System" ";"
 
-class_declaration: "class" IDENTIFIER "{" main_declaration "}"
+class_declaration: "class" IDENTIFIER "{" (main_declaration | method_declaration)* "}"
 
 main_declaration: "static" "void" "Main" "(" ")" block
 
@@ -21,19 +21,53 @@ statement: var_decl
          | while_statement
          | input_statement
          | output_statement
+         | switch_statement
+         | for_statement
+         | break_statement
+         | continue_statement
+         | array_decl
+         | array_assignment
+         | method_declaration
+         | method_call
+         | return_statement
+
+SEMICOLON: ";"
+EQUAL: "="
 
 var_decl: data_type IDENTIFIER "=" (expr | bool_expr | input_statement) ";"
          | data_type IDENTIFIER ";"
-
+         | data_type IDENTIFIER "=" method_call
 
 var_assignment: IDENTIFIER "=" (expr | bool_expr | input_statement) ";"
+                | IDENTIFIER (INCREASES_BY_ONE|DECREASES_BY_ONE)";" //incremento/decremento di uno
+                | IDENTIFIER (SUM_AT_VAR | SUB_AT_VAR | MUL_AT_VAR | DIV_AT_VAR) (expr | bool_expr | STRING | input_statement)";"
+                | IDENTIFIER "=" method_call
+
+array_decl: array_type IDENTIFIER "=" "{"ARRAY_CONTENT "}"";"
+            | array_type IDENTIFIER "=" "new" data_type "["expr"]"  ";"
+            | array_type IDENTIFIER "=" "new" data_type "["expr"]" "{"ARRAY_CONTENT "}"";"
+            | array_type IDENTIFIER "=" "new" data_type "[""]" "{"ARRAY_CONTENT "}"";"
+            | array_type IDENTIFIER ";"
+
+array_assignment: IDENTIFIER "=" "new" data_type "["expr"]" "{"ARRAY_CONTENT"}" ";"
+                 | IDENTIFIER "=" "new" data_type "[""]" "{"ARRAY_CONTENT"}" ";"
 
 
 !data_type: INT_TYPE | BOOL_TYPE | STRING_TYPE
 
+!array_type: data_type "[""]"
+ARRAY_CONTENT: /[^{}]+/
+
 INT_TYPE: "int"
 BOOL_TYPE: "bool"
 STRING_TYPE: "string"
+
+INCREASES_BY_ONE: "++"
+DECREASES_BY_ONE: "--"
+SUM_AT_VAR: "+="
+SUB_AT_VAR: "-="
+MUL_AT_VAR: "*="
+DIV_AT_VAR: "/="
 
 expr: term
      | expr "+" term    -> add
@@ -49,6 +83,10 @@ factor:  NUMBER
        | STRING
        | "(" expr ")"
        | input_statement
+       | IDENTIFIER "." "Length" -> length_statement
+       | IDENTIFIER".""ToUpper""("")" -> to_upper_string
+       | IDENTIFIER".""ToLower""("")" -> to_lower_string
+       | IDENTIFIER "[" expr "]" -> access_statement
 
 bool_expr: bool_term
          | bool_expr "||" bool_expr -> lor
@@ -76,7 +114,34 @@ input_statement:"Console"".""ReadLine" "(" ")"
 
 if_statement: "if" "(" (bool_expr|expr) ")" block ("else" (if_statement| block))?
 
-while_statement: "while" "(" bool_expr ")" block
+while_statement: "while" "(" bool_expr ")" block (break_statement)?
+
+switch_statement: "switch" "(" (IDENTIFIER | expr) ")" "{" case_clause* default_clause? "}"
+
+for_statement: "for" "(" (var_decl | var_assignment) bool_expr";" for_update ")" block
+
+for_update: IDENTIFIER "=" (expr | bool_expr)
+                | IDENTIFIER (INCREASES_BY_ONE|DECREASES_BY_ONE)//incremento/decremento di uno
+                | IDENTIFIER (SUM_AT_VAR | SUB_AT_VAR | MUL_AT_VAR | DIV_AT_VAR) (expr | bool_expr)
+
+case_clause: "case" (expr | bool_expr) ":" statement*
+
+default_clause: "default" ":" statement*
+
+break_statement: "break"";"
+
+continue_statement: "continue"";"
+
+method_declaration: "static" "void" IDENTIFIER "(" parameter_list? ")" "{" statement* "}"
+                   | "static" data_type IDENTIFIER "(" parameter_list ")" "{" statement* "}"
+
+method_call: IDENTIFIER "(" argument_list? ")" ";"?
+
+argument_list: (expr) ("," expr)*
+
+parameter_list: (data_type IDENTIFIER) ("," data_type IDENTIFIER)*
+
+return_statement: "return" (expr? | bool_term?) ";"
 
 MULTILINE_COMMENT: /\/\*(.|\n)*?\*\//
 INLINE_COMMENT: "//" /[^\n]*/

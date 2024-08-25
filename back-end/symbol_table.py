@@ -12,7 +12,7 @@ class SymbolTable:
         :param value: Indica il valore della variabile
         """
         if identifier in self.symbols:
-            raise Exception(f"Errore: la variabile '{identifier}' è già definita.")
+            raise Exception(f"Error: the variable '{identifier}' is already defined.")
         self.symbols[identifier] = {'type': symbol_type, 'value': value}
 
     def set_value(self, identifier, value):
@@ -22,7 +22,7 @@ class SymbolTable:
         :param value: Indica il nuovo valore della variabile
         """
         if identifier not in self.symbols:
-            raise Exception(f"Errore: La variabile '{identifier}' non è stata definita.")
+            raise Exception(f"Error: The variable '{identifier}' was not defined.")
         self.symbols[identifier]['value'] = value
 
     def get_value(self, identifier):
@@ -32,7 +32,7 @@ class SymbolTable:
         :return: Restituisce il valore associato alla variabile nella tabella symbols
         """
         if identifier not in self.symbols:
-            raise Exception(f"Errore: La variabile '{identifier}' non è definita.")
+            raise Exception(f"Error: The variable '{identifier}' was not defined.")
         return self.symbols[identifier]['value']
 
     def get_type(self, identifier):
@@ -42,5 +42,25 @@ class SymbolTable:
         :return: Restituisce il tipo associato alla variabile nella tabella symbols
         """
         if identifier not in self.symbols:
-            raise Exception(f"Errore: La variabile '{identifier}' non è definita.")
+            raise Exception(f"Error: The variable '{identifier}' was not defined.")
         return self.symbols[identifier]['type']
+
+    def method_define(self, identifier, attributes):
+        """
+        Permette di aggiungere un metodo alla tabella symbols
+        :param identifier: Indica il nome del metodo da aggiungere alla tabella symbols
+        :param attributes: Dizionario che indica tutti gli attributi del metodo
+        """
+        if identifier in self.symbols:
+            raise Exception(f"Error: The method '{identifier}' is already defined.")
+        self.symbols[identifier] = attributes
+
+    def get_method_attribute(self, identifier):
+        """
+        Permette di recuperare il dizionario degli attributi di un metodo presente nella tabella symbols
+        :param identifier: Indica il nome del metodo di cui recuperare gli attributi
+        :return: Restituisce il dizionario degli attributi associato al metodo.
+        """
+        if identifier not in self.symbols:
+            raise Exception(f"Error: The method '{identifier}' was not defined.")
+        return self.symbols[identifier]
