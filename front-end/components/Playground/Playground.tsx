@@ -10,7 +10,9 @@ import {newSocket} from '@/actions/socket';
 import Console from '@/components/Console/Console';
 import Menu from '@/components/Menu/Menu';
 
-
+/**
+ * Definizione dell'interfaccia utilizzata dalla variabile di stato output
+ */
 export type IOutput = {
     chiave: 'message' | 'value',
     valore: any
@@ -31,6 +33,7 @@ class Program
     const [consoleType, setConsoleType] = React.useState<boolean>(false);
     const [output, setOutput] = React.useState<IOutput[]>([]);
     const [error, setError] = React.useState<string>('');
+    const [imageSrc, setImageSrc] = React.useState<string>('');
 
 
     const monaco = useMonaco();
@@ -46,7 +49,39 @@ class Program
 
     const handleSocketRunCode = () => {
 
-        newSocket.emit('run_code', {code: code});
+        // Svuota l'output prima di eseguire il codice
+        setOutput([]);
+        setError('');
+        setImageSrc('')
+
+
+        // Rimuove eventuali listener duplicati prima di aggiungerne di nuovi
+        newSocket.off("output");
+        newSocket.off("error");
+        newSocket.off("image");
+        newSocket.off("clear");
+
+
+        newSocket.emit("run_code", {code: code, consoleType: consoleType});
+
+        newSocket.on("error", (data) => {
+            setError(data.error);
+        });
+
+        newSocket.on("output", (data) => {
+            setOutput(prevOutput => [...prevOutput, {chiave: "message", valore: data.output}]);
+
+        });
+
+        newSocket.on("image", (data) =>{
+            setImageSrc('data:image/png;base64,' + data.image);
+        });
+
+        newSocket.on("clear", () => {
+            setOutput([]);
+            setError('');
+            setImageSrc('');
+        });
     };
 
     return (
@@ -71,7 +106,7 @@ class Program
 
                         <Menu
                             onClickVoiceItem={(content) => setCode(content)}
-                            onUploadFile={(content, extensions) => setCode(content)}
+                            onUploadFile={(content) => setCode(content)}
                             getCode={() => code}
                         />
 
@@ -122,6 +157,7 @@ class Program
                         setOutput={setOutput}
                         error={error}
                         setError={setError}
+                        img={imageSrc}
                     />
 
                 </section>

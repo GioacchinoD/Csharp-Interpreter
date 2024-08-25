@@ -1,8 +1,9 @@
 import React, {useEffect, useRef} from "react";
-import {TerminalIcon} from "lucide-react";
+import {TerminalIcon, FileImageIcon} from "lucide-react";
 import {Switch} from "@/components/ui/switch";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
+import {Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription} from "@/components/ui/dialog";
 
 import {newSocket} from "@/actions/socket";
 import {IOutput} from "@/components/Playground/Playground";
@@ -21,6 +22,8 @@ type IConsole = {
 
     error: string;
     setError: (value: string | ((prevError: string) => string)) => void;
+
+    img: string;
 };
 /**
  *
@@ -30,6 +33,7 @@ type IConsole = {
  * @param setOutput
  * @param error Variabile utilizzata per contenere un eventuale errore ricevuto dal back-ed Python.
  * @param setError
+ * @param img contiene il base64 dell'immagine generata dal parser di Python
  */
 
 export default function Console({
@@ -38,7 +42,8 @@ export default function Console({
     output,
     setOutput,
     error,
-    setError}: IConsole){
+    setError,
+    img}: IConsole){
 
     const [inputRequired, setInputRequired] = React.useState<boolean>(false);
     const [userInput, setUserInput] = React.useState<string>('')
@@ -77,6 +82,30 @@ export default function Console({
             <div className={'flex justify-between items-center bg-gray-800 p-2 rounded-t border border-gray-800 border-b-0 gap-2'}>
 
                 <h4 className={'text-lg font-bold text-white'}>Console</h4>
+
+                {img !== "" ? (
+                    <Dialog modal={true}>
+                        <DialogTrigger asChild>
+                            <Button variant="ghost" className={"text-lg font-bold"}>
+                                <FileImageIcon className="mr-2 h-6 w-6"/>
+                                Visualizza Parse Tree
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="w-full h-full max-w-none p-4 m-0 overflow-auto">
+                            <DialogHeader>
+                                <DialogTitle>Parse Tree</DialogTitle>
+                                <DialogDescription className="flex justify-center items-center min-h-full">
+                                    <img
+                                        src={img}
+                                        className="max-w-full max-h-full object-contain"
+                                        alt={"Parse Tree"}
+                                    />
+                                </DialogDescription>
+                            </DialogHeader>
+                        </DialogContent>
+                    </Dialog>
+                ) : undefined}
+
 
                 <div className={'flex items-center gap-2'}>
 

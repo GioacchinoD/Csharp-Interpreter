@@ -3,10 +3,6 @@ import {
     MenubarContent,
     MenubarItem,
     MenubarMenu,
-    MenubarSeparator,
-    MenubarSub,
-    MenubarSubContent,
-    MenubarSubTrigger,
     MenubarTrigger
 } from '@/components/ui/menubar';
 
@@ -17,7 +13,7 @@ import {getExampleFolderCode} from '@/actions/listFiles';
 
 type IMenu = {
     onClickVoiceItem: (content: string) => void;
-    onUploadFile: (content: string, extensions: string) => void;
+    onUploadFile: (content: string) => void;
     getCode: () => string;
 }
 
@@ -128,7 +124,7 @@ export default function Menu({
                     fileReader.onload = ev => {
                         const content = ev.target?.result;
                         if(content !== null && content !== undefined) {
-                            onUploadFile(content.toString(), files.item(0)!.name.split('.')[1]);
+                            onUploadFile(content.toString());
                         }
                     };
                 }

@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "start_project_windows" : "npm run open-browser-w && next dev",
+    "open-browser-w": "start http://localhost:3000",
+    "start_project_linux" : "npm run open-browser-l && next dev",
+    "open-browser-l": "xdg-open http://localhost:3000",
+    "start_project_mac" : "npm run open-browser-m && next dev",
+    "open-browser-m": "open http://localhost:3000"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
