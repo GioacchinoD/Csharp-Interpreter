@@ -108,6 +108,26 @@ C# grammar reference: https://ecma-international.org/wp-content/uploads/ECMA-334
       - continue statement [extra]
       - return statement [extra]
 
+## Managed error
+
+* Syntax Error:
+      
+        - Missing open round bracket '('
+        - Missing closed round bracket ')'
+        - Missing semicolon ';'
+        - Missing equal '='
+
+* Semantic Error:
+
+      - Unsupported Operation Type
+      - Index Out of Range
+
+* Other types of errors:
+
+      - Type error
+      - Errors for variables
+      - Errors for arrays
+      - Errors for methods reserved for strings
 
 # Instructions for the execution of the project
 
