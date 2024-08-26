@@ -189,9 +189,9 @@ class CSharpTransformer(Transformer):
         try:
             if type(items[0]) == type(items[1]):
                 return items[0] + items[1]
-            elif type(items[0]) in [int, list] and type(items[1]) == str:
+            elif type(items[0]) in [int, list, bool] and type(items[1]) == str:
                 return str(items[0]) + items[1]
-            elif type(items[0]) == str and type(items[1]) in [int, list]:
+            elif type(items[0]) == str and type(items[1]) in [int, list, bool]:
                 return items[0] + str(items[1])
         except UnsupportedOperationType:
             raise UnsupportedOperationType(type1=type(items[0]), type2=type(items[1]), operation=operation)

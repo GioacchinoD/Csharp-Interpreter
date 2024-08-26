@@ -450,7 +450,7 @@ class CsharpInterpreter(Interpreter):
                 raise TypeError(
                     f"Argument {param_name.value} expected type {expected_type.__name__}, got {type(argument_value).__name__}"
                 )
-            self.csharp_transformer.symbol_table.define(name=param_name, symbol_type=param_type, value=argument_value)
+            self.csharp_transformer.symbol_table.define(identifier=param_name, symbol_type=param_type, value=argument_value)
 
         result = None
 

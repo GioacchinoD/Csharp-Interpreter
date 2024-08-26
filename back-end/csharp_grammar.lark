@@ -91,7 +91,7 @@ factor:  NUMBER
 bool_expr: bool_term
          | bool_expr "||" bool_expr -> lor
          | bool_expr "&&" bool_expr -> land
-         | "!" bool_expr            -> lnot
+         | "!" (bool_expr | expr)            -> lnot
          | "(" bool_expr ")"
 
 bool_term: expr "==" expr            -> eq
