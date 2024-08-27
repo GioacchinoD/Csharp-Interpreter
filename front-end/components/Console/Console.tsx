@@ -125,7 +125,7 @@ export default function Console({
 
             </div>
 
-            <div className={'border-t-0 border border-zinc-600 rounded-b bg-background p-4 h-40 overflow-y-auto'} ref={containerRef}>
+            <div className={'border-t-0 border border-zinc-600 rounded-b bg-background p-4 h-44 overflow-y-auto'} ref={containerRef}>
 
                 <div className={'flex items-start gap-2'}>
 

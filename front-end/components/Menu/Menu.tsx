@@ -2,7 +2,7 @@ import {
     Menubar,
     MenubarContent,
     MenubarItem,
-    MenubarMenu,
+    MenubarMenu, MenubarSeparator, MenubarSub, MenubarSubContent, MenubarSubTrigger,
     MenubarTrigger
 } from '@/components/ui/menubar';
 
@@ -23,8 +23,8 @@ export default function Menu({
                                  getCode
                              }: IMenu) {
 
-    const [menuItem, setMenuItem] = React.useState<any[]>([]);
-
+    const [menuItemExample, setMenuItemExample] = React.useState<any[]>([]);
+    const [menuItemErrorExample, setMenuItemErrorExample] = React.useState<any[]>([]);
     /**
      * reference del campo input nascosto utilizzato da CARICA FILE per poter leggere il contenuto
      * di un file .cs dal filesystem e inserirlo all'interno dell'editor.
@@ -35,13 +35,15 @@ export default function Menu({
         /**
          * Funzione asincrona che richiama l'azione server definita nel file listFiles.ts,
          * l'interno del blocco try consente di reperire tutti i file presenti all'interno del
-         * path `./esempi/esempi C#`.
+         * path `./esempi`.
          * nel blocco catch viene stampato un errore all'interno della console del browser
          */
         (async () => {
             try{
-                const result = await getExampleFolderCode(`./esempi/esempi C#`);
-                setMenuItem(result);
+                const result = await getExampleFolderCode(`./esempi/Esempi`);
+                const result1 = await getExampleFolderCode(`./esempi/Esempi errori`);
+                setMenuItemExample(result);
+                setMenuItemErrorExample(result1);
             } catch (error) {
                 console.error("error get file c#: ", error);
             }
@@ -94,18 +96,42 @@ export default function Menu({
                     </MenubarItem>
                 </MenubarContent>
             </MenubarMenu>
+
             <MenubarMenu>
                 <MenubarTrigger className={'cursor-pointer'}>Example</MenubarTrigger>
                 <MenubarContent>
-                    {menuItem.map((element, index) => {
-                        return <MenubarItem
-                            key={index}
-                            className={"cursor-pointer"}
-                            onClick={() => onClickVoiceItem(element.content)}
-                        >
-                            {element.nome}
-                        </MenubarItem>
-                    })}
+
+                <MenubarSub>
+                    <MenubarSubTrigger>Code example</MenubarSubTrigger>
+                    <MenubarSubContent>
+                        {menuItemExample.map((element, index) => {
+                            return <MenubarItem
+                                key={index}
+                                className={"cursor-pointer"}
+                                onClick={() => onClickVoiceItem(element.content)}
+                            >
+                                {element.nome}
+                            </MenubarItem>
+                        })}
+                    </MenubarSubContent>
+                </MenubarSub>
+                <MenubarSeparator/>
+
+                    <MenubarSub>
+                        <MenubarSubTrigger>Error example</MenubarSubTrigger>
+                        <MenubarSubContent>
+                            {menuItemErrorExample.map((element, index) => {
+                                return <MenubarItem
+                                    key={index}
+                                    className={"cursor-pointer"}
+                                    onClick={() => onClickVoiceItem(element.content)}
+                                >
+                                    {element.nome}
+                                </MenubarItem>
+                            })}
+                        </MenubarSubContent>
+                    </MenubarSub>
+
                 </MenubarContent>
             </MenubarMenu>
 
