@@ -1,5 +1,6 @@
 import base64
 from lark import Lark, UnexpectedInput
+from lark.exceptions import UnexpectedToken
 from lark.tree import pydot__tree_to_png
 from flask import Flask
 from flask_socketio import SocketIO, emit
@@ -54,10 +55,14 @@ def parse(csharp_code):
         elif u.token.type in {'RBRACE', 'CONSOLE', 'IDENTIFIER', 'IF', 'WHILE', 'FOR',
                               'SWITCH'} and 'SEMICOLON' in u.expected or u.expected == {'SEMICOLON'}:
             raise MissingSemicolon(error_line, u.line, u.column)
-        if "(" in error_line and 'RPAR' in u.expected:
+        if ("(" in error_line and 'RPAR' in u.expected and csharp_code.count('(') != csharp_code.count(')')) or (csharp_code.count('(') != csharp_code.count(')') and 'RPAR' in u.expected):
             raise MissingClosingBracketError(error_line, u.line, u.column)
         if ("Console" in error_line or ")" in error_line) and u.expected == {'LPAR'}:
             raise MissingOpeningBracketError(error_line, u.line, u.column)
+        if 'RSQB' in u.expected:
+            raise Exception(f'Manca la parentesi quadra alla linea {u.line} e alla colonna {u.column}')
+        else:
+            raise Exception(f"LexicalError: scanning failed due to unexpected input at line {u.line} and column {u.column}\n")
 
 
 @socketio.on('run_code')
@@ -109,7 +114,7 @@ class Program
     except MissingClosingBracketError as e:
         emit('error', {'error': f"{str(e)}"})
     except Exception as e:
-        emit('error', {'error': f"Errore di esecuzione: {str(e)}"})
+        emit('error', {'error': f"{str(e)}"})
 
     finally:
         csharp_transformer.symbol_table.symbols.clear()

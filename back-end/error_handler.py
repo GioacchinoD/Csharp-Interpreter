@@ -78,14 +78,12 @@ def check_array_type(array_type, expected_type):
 def type_in_array(array_type, array_content):
     if array_type == 'string':
         for item in array_content:
-            if not item.startswith('"') and not item.endswith('"'):
+            if type(item) != str:
                 raise TypeError(
                     f"Invalid value for string array. Check element at position:  {array_content.index(item)}")
     elif array_type == 'int':
         for item in array_content:
-            try:
-                int(item)
-            except ValueError:
+            if type(item) != int:
                 raise TypeError(
                     f"Invalid value for array of integers. Check element at position: {array_content.index(item)}")
 

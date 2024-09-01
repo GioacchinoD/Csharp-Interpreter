@@ -43,20 +43,22 @@ var_assignment: IDENTIFIER "=" (expr | bool_expr | input_statement) ";"
                 | IDENTIFIER (SUM_AT_VAR | SUB_AT_VAR | MUL_AT_VAR | DIV_AT_VAR) (expr | bool_expr | STRING | input_statement)";"
                 | IDENTIFIER "=" method_call
 
-array_decl: array_type IDENTIFIER "=" "{"ARRAY_CONTENT "}"";"
+array_decl: array_type IDENTIFIER "=" "{"array_content "}"";"
             | array_type IDENTIFIER "=" "new" data_type "["expr"]"  ";"
-            | array_type IDENTIFIER "=" "new" data_type "["expr"]" "{"ARRAY_CONTENT "}"";"
-            | array_type IDENTIFIER "=" "new" data_type "[""]" "{"ARRAY_CONTENT "}"";"
+            | array_type IDENTIFIER "=" "new" data_type "["expr"]" "{"array_content "}"";"
+            | array_type IDENTIFIER "=" "new" data_type "[""]" "{"array_content "}"";"
             | array_type IDENTIFIER ";"
 
-array_assignment: IDENTIFIER "=" "new" data_type "["expr"]" "{"ARRAY_CONTENT"}" ";"
-                 | IDENTIFIER "=" "new" data_type "[""]" "{"ARRAY_CONTENT"}" ";"
+array_assignment: IDENTIFIER "=" "new" data_type "["expr"]" "{"array_content"}" ";"
+                 | IDENTIFIER "=" "new" data_type "[""]" "{"array_content"}" ";"
+                 | IDENTIFIER "["expr"]" "=" expr ";" // Permette di modificare il contenuto di un array a una determinata posizione.
 
 
 !data_type: INT_TYPE | BOOL_TYPE | STRING_TYPE
 
 !array_type: data_type "[""]"
-ARRAY_CONTENT: /[^{}]+/
+
+array_content: expr("," expr)*
 
 INT_TYPE: "int"
 BOOL_TYPE: "bool"
@@ -114,7 +116,7 @@ input_statement:"Console"".""ReadLine" "(" ")"
 
 if_statement: "if" "(" (bool_expr|expr) ")" block ("else" (if_statement| block))?
 
-while_statement: "while" "(" bool_expr ")" block (break_statement)?
+while_statement: "while" "(" (bool_expr|expr) ")" block (break_statement)?
 
 switch_statement: "switch" "(" (IDENTIFIER | expr) ")" "{" case_clause* default_clause? "}"
 

@@ -33,6 +33,8 @@ class SymbolTable:
         """
         if identifier not in self.symbols:
             raise Exception(f"Error: The variable '{identifier}' was not defined.")
+        if self.symbols[identifier]['value'] is None:
+            raise Exception(f"Error: The variable '{identifier}' does not have a valid value.")
         return self.symbols[identifier]['value']
 
     def get_type(self, identifier):

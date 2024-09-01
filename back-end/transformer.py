@@ -1,4 +1,4 @@
-from lark import Transformer, Token
+from lark import Transformer, Token, Tree
 from symbol_table import SymbolTable
 from error_handler import *
 from flask_socketio import emit
@@ -234,6 +234,8 @@ class CSharpTransformer(Transformer):
         operation = "division"
         try:
             op_type(items, operation)
+            if items[1] == 0:
+                raise Exception("Error: division by zero unsupported")
             if type(items[0]) == int:
                 return items[0] // items[1]
         except UnsupportedOperationType:
@@ -505,40 +507,26 @@ class CSharpTransformer(Transformer):
             self.symbol_table.define(identifier, array_type, value=[])
 
         elif len(items) == 3:  # Dichiarazione di un array con tre elementi (es. string[] cars = {"Volvo", "BMW", "Ford", "Mazda"})
-            array_content = [item.strip() for item in items[2].split(',')]
+            array_content = [item for item in items[2].children]
             type_in_array(array_type.children[0].children[0].value, array_content)
-
-            if array_type.children[0].children[0].value == 'string':
-                array_content = [item.strip('"') for item in array_content]
-            if array_type.children[0].children[0].value == 'int':
-                array_content = [int(item) for item in array_content]
 
             self.symbol_table.define(identifier, array_type, array_content)
 
         elif len(items) == 4: # Dichiarazione di un array con quattro elementi (es. string[] cars = new string[] {"Volvo", "BMW", "Ford", "Mazda"})
             if isinstance(items[3], Token):
                 if items[3].type == 'ARRAY_CONTENT':
-                    array_content = [item.strip() for item in items[3].split(',')]
+                    array_content = [item for item in items[3].children]
                     type_in_array(array_type.children[0].children[0].value, array_content)
 
-                    if array_type.children[0].children[0].value == 'string':
-                        array_content = [item.strip('"') for item in array_content]
-                    if array_type.children[0].children[0].value == 'int':
-                        array_content = [int(item) for item in array_content]
-                        self.symbol_table.define(identifier, array_type, array_content)
+                    self.symbol_table.define(identifier, array_type, array_content)
             else:
                 self.symbol_table.define(identifier, array_type, value=[])
 
         elif len(items) == 5: # Dichiarazione di un array con cinque elementi (es. string[] cars = new string[4] {"Volvo", "BMW", "Ford", "Mazda"})
             array_max_length = items[3]
-            array_content = [item.strip() for item in items[4].split(',')]
+            array_content = [item for item in items[4].children]
             length_array(array_max_length, array_content)
             type_in_array(array_type.children[0].children[0].value, array_content)
-
-            if array_type.children[0].children[0].value == 'string':
-                array_content = [item.strip('"') for item in array_content]
-            if array_type.children[0].children[0].value == 'int':
-                array_content = [int(item) for item in array_content]
 
             self.symbol_table.define(identifier, array_type, array_content)
 
@@ -560,31 +548,31 @@ class CSharpTransformer(Transformer):
             raise SymbolNotFoundError(identifier)
 
         array_type = self.symbol_table.get_type(identifier)
-        expected_type = items[1]
+        if isinstance(items[1], Tree):
+            expected_type = items[1]
 
-        check_array_type(array_type.children[0].children[0].value, expected_type.children[0].value)
+            check_array_type(array_type.children[0].children[0].value, expected_type.children[0].value)
 
-        if len(items) == 3: # Assegnazione di un array con tre elementi (es. cars = new string[] {"Volvo", "BMW", "Ford"})
-            array_content = [item.strip() for item in items[2].split(',')]
-            type_in_array(array_type.children[0].children[0].value, array_content)
-            if array_type.children[0].children[0].value == 'string':
-                array_content = [item.strip('"') for item in array_content]
-            if array_type.children[0].children[0].value == 'int':
-                array_content = [int(item) for item in array_content]
+            if len(items) == 3: # Assegnazione di un array con tre elementi (es. cars = new string[] {"Volvo", "BMW", "Ford"})
+                array_content = [item for item in items[2].children]
+                type_in_array(array_type.children[0].children[0].value, array_content)
 
-            self.symbol_table.set_value(identifier, array_content)
+                self.symbol_table.set_value(identifier, array_content)
 
-        elif len(items) == 4: # Assegnazione di un array con quattro elementi (es. cars = new string[4] {"Volvo", "BMW", "Ford", "Mazda"})
-            array_max_length = items[2]
-            array_content = [item.strip() for item in items[3].split(',')]
-            type_in_array(array_type.children[0].children[0].value, array_content)
-            length_array(array_max_length, array_content)
-            if array_type.children[0].children[0].value == 'string':
-                array_content = [item.strip('"') for item in array_content]
-            if array_type.children[0].children[0].value == 'int':
-                array_content = [int(item) for item in array_content]
+            elif len(items) == 4: # Assegnazione di un array con quattro elementi (es. cars = new string[4] {"Volvo", "BMW", "Ford", "Mazda"})
+                array_max_length = items[2]
+                array_content = [item for item in items[3].children]
+                type_in_array(array_type.children[0].children[0].value, array_content)
+                length_array(array_max_length, array_content)
 
-            self.symbol_table.set_value(identifier, array_content)
+                self.symbol_table.set_value(identifier, array_content)
+
+        else:
+            position = items[1]
+            value = self.symbol_table.get_value(identifier)
+            value[position] = items[2]
+            type_in_array(array_type.children[0].children[0].value, value)
+
 
     # Aggiornamento della variabile di controllo di un ciclo for
     def for_update(self, items):

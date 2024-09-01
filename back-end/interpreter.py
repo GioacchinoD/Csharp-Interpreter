@@ -102,6 +102,9 @@ class CsharpInterpreter(Interpreter):
         """
         condition = self.csharp_transformer.transform(tree.children[0])
 
+        if type(condition) != bool and condition is not None:
+            raise Exception(f"Semantic Error: Cannot implicitly convert type `{type(condition).__name__}` to `bool`")
+
         if condition:
             try:
                 for statement in tree.children[1].children:
@@ -119,6 +122,10 @@ class CsharpInterpreter(Interpreter):
         :param tree: Albero sintattico della dichiarazione while.
         """
         condition = self.csharp_transformer.transform(tree.children[0])
+
+        if type(condition) != bool and condition is not None:
+            raise Exception(f"Semantic Error: Cannot implicitly convert type `{type(condition).__name__}` to `bool`")
+
         while condition:
             try:
                 for statement in tree.children[1].children:
