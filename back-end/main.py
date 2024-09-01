@@ -50,19 +50,25 @@ def parse(csharp_code):
 
         # Gestione degli errori specifici in base al tipo di token o contesto
         if u.token.type in {'NUMBER', 'STRING', 'IDENTIFIER',
-                            'CONSOLE'} and "=" not in error_line and 'EQUAL' in u.expected:
+                            'CONSOLE', 'NEW'} and "=" not in error_line and 'EQUAL' in u.expected:
             raise MissingEqual(error_line, u.line, u.column)
         elif u.token.type in {'RBRACE', 'CONSOLE', 'IDENTIFIER', 'IF', 'WHILE', 'FOR',
                               'SWITCH'} and 'SEMICOLON' in u.expected or u.expected == {'SEMICOLON'}:
             raise MissingSemicolon(error_line, u.line, u.column)
-        if ("(" in error_line and 'RPAR' in u.expected and csharp_code.count('(') != csharp_code.count(')')) or (csharp_code.count('(') != csharp_code.count(')') and 'RPAR' in u.expected):
+        elif ("(" in error_line and 'RPAR' in u.expected and csharp_code.count('(') != csharp_code.count(')')) or (csharp_code.count('(') != csharp_code.count(')') and 'RPAR' in u.expected):
             raise MissingClosingBracketError(error_line, u.line, u.column)
-        if ("Console" in error_line or ")" in error_line) and u.expected == {'LPAR'}:
+        elif ("Console" in error_line or ")" in error_line) and u.expected == {'LPAR'}:
             raise MissingOpeningBracketError(error_line, u.line, u.column)
-        if 'RSQB' in u.expected:
-            raise Exception(f'Manca la parentesi quadra alla linea {u.line} e alla colonna {u.column}')
+        elif 'LSQB' in u.expected and error_line.count('[') < error_line.count(']'):
+            raise MissingOpeningSquareBracketError(error_line, u.line, u.column)
+        elif 'RSQB' in u.expected and error_line.count('[') > error_line.count(']'):
+            raise MissingClosingSquareBracketError(error_line, u.line, u.column)
+        elif csharp_code.count('{') < csharp_code.count('}') or csharp_code.count('{') > csharp_code.count('}') :
+            raise Exception("Check the brackets")
         else:
-            raise Exception(f"LexicalError: scanning failed due to unexpected input at line {u.line} and column {u.column}\n")
+            if error_line.strip() == '{':
+                error_line = csharp_code.splitlines()[u.line - 2]
+            raise CsharpLexicalError(error_line, u.line, u.column)
 
 
 @socketio.on('run_code')
@@ -112,6 +118,10 @@ class Program
     except MissingOpeningBracketError as e:
         emit('error', {'error': f"{str(e)}"})
     except MissingClosingBracketError as e:
+        emit('error', {'error': f"{str(e)}"})
+    except MissingOpeningSquareBracketError as e:
+        emit('error', {'error': f"{str(e)}"})
+    except MissingClosingSquareBracketError as e:
         emit('error', {'error': f"{str(e)}"})
     except Exception as e:
         emit('error', {'error': f"{str(e)}"})

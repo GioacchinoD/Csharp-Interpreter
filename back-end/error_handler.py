@@ -13,6 +13,12 @@ class TypeMismatchError(CsharpInterpreterError):
     def __init__(self, expected, got):
         super().__init__(f"Error: Wrong type. Expected '{expected}', obtained '{got}'.")
 
+class CsharpLexicalError(Exception):
+    label = "LexicalError: scanning failed due to unexpected input"
+
+    def __str__(self):
+        context, line, column = self.args
+        return '%s at line %s.\n\n%s' % (self.label, line, context)
 
 class CsharpSyntaxError(SyntaxError):
     def __str__(self):
@@ -48,6 +54,22 @@ class MissingEqual(CsharpSyntaxError):
 
 class MissingSemicolon(CsharpSyntaxError):
     label = 'Syntax Error: Missing ;'
+
+    def __str__(self):
+        context, line, column = self.args
+        error_pointer = ' ' * (column - 2) + '^'
+        return '%s at line %s, column %s.\n\n%s\n%s' % (self.label, line, column, context, error_pointer)
+
+class MissingOpeningSquareBracketError(UnmatchedParenthesisError):
+    label = 'Syntax Error: Missing ['
+
+    def __str__(self):
+        context, line, column = self.args
+        error_pointer = ' ' * (column - 2) + '^'
+        return '%s at line %s, column %s.\n\n%s\n%s' % (self.label, line, column, context, error_pointer)
+
+class MissingClosingSquareBracketError(UnmatchedParenthesisError):
+    label = 'Syntax Error: Missing ]'
 
     def __str__(self):
         context, line, column = self.args
