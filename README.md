@@ -114,7 +114,11 @@ C# grammar reference: https://ecma-international.org/wp-content/uploads/ECMA-334
       
         - Missing open round bracket '('
         - Missing closed round bracket ')'
-        - Missing semicolon ';'
+        - Missing open square parenthesis '['
+        - Missing closed square parenthesis ']'
+        - Missing open claw bracket '{'
+        - Missing closed claw bracket '}'
+        - Missing the semicolon ';'
         - Missing equal '='
 
 * Semantic Error:
