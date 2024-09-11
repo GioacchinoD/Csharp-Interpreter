@@ -84,14 +84,14 @@ export default function Menu({
                     }}>
                         <div className={'flex items-center gap-2'}>
                             <UploadIcon className={'w-4 h-4'}/>
-                            <span>Carica file</span>
+                            <span>Upload file</span>
                         </div>
 
                     </MenubarItem>
                     <MenubarItem className={'cursor-pointer'} onClick={handleSaveFile}>
                         <div className={'flex items-center gap-2'}>
                             <SaveIcon className={'w-4 h-4'}/>
-                            <span>Salva file</span>
+                            <span>Save file</span>
                         </div>
                     </MenubarItem>
                 </MenubarContent>

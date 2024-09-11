@@ -1,4 +1,4 @@
-from lark import Transformer, Token, Tree
+from lark.visitors import Transformer, Token, Tree
 from symbol_table import SymbolTable
 from error_handler import *
 from flask_socketio import emit
@@ -168,13 +168,15 @@ class CSharpTransformer(Transformer):
         :param items: Elementi che rappresentano il fattore.
         :return: Il valore del fattore.
         """
-        if items[0].type == 'NUMBER':
-            return int(items[0].value)
-        elif items[0].type == 'STRING':
-            return str(items[0].value.strip('"'))
-        elif items[0].type == 'IDENTIFIER':
-            return self.symbol_table.get_value(items[0].value)
-        return items[0]
+        if isinstance(items[0], Token):
+            if items[0].type == 'NUMBER':
+                return int(items[0].value)
+            elif items[0].type == 'STRING':
+                return str(items[0].value.strip('"'))
+            elif items[0].type == 'IDENTIFIER':
+                return self.symbol_table.get_value(items[0].value)
+        else:
+            return items[0]
 
     # Operazioni aritmetiche di somma, sottrazione, moltiplicazione e divisione, modulo
 

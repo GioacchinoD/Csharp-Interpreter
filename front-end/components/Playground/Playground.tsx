@@ -5,6 +5,7 @@ import Editor, {useMonaco} from '@monaco-editor/react'
 
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Button} from "@/components/ui/button";
+import {PlayIcon, SaveIcon} from "lucide-react";
 
 import {newSocket} from '@/actions/socket';
 import Console from '@/components/Console/Console';
@@ -118,7 +119,11 @@ class Program
                                     size={'sm'}
                                     variant={'default'}
                                     onClick={() => handleSocketRunCode()}>
-                                    Esegui
+                                    <div className={'flex items-center gap-2'}>
+                                        <span>Run</span>
+                                        <PlayIcon className={'w-4 h-4'}/>
+
+                                    </div>
                                 </Button>
 
                             </section>

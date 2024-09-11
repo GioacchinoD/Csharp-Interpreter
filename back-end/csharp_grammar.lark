@@ -1,6 +1,6 @@
 // Importazione di componenti comuni
 %import common.CNAME -> IDENTIFIER
-%import common.NUMBER
+%import common.INT -> NUMBER
 %import common.ESCAPED_STRING   // Importa il terminale ESCAPED_STRING
 %import common._STRING_INNER
 %import common.WS

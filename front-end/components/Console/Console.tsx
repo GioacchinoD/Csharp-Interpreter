@@ -111,7 +111,7 @@ export default function Console({
 
                     <span className={'text-lg font-bold text-white'}>
 
-                        {consoleType ? 'Dinamico' : 'Statico'}
+                        {consoleType ? 'Dynamic' : 'Static'}
 
                     </span>
 

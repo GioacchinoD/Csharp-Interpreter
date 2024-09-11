@@ -76,6 +76,22 @@ class MissingClosingSquareBracketError(UnmatchedParenthesisError):
         error_pointer = ' ' * (column - 2) + '^'
         return '%s at line %s, column %s.\n\n%s\n%s' % (self.label, line, column, context, error_pointer)
 
+class MissingOpeningClawBracketError(UnmatchedParenthesisError):
+    label = 'Syntax Error: Missing {'
+
+    def __str__(self):
+        context, line, column = self.args
+        error_pointer = ' ' * (column - 2) + '^'
+        return '%s at line %s, column %s.\n\n%s\n%s' % (self.label, line, column, context, error_pointer)
+
+class MissingClosingClawBracketError(UnmatchedParenthesisError):
+    label = 'Syntax Error: Missing }'
+
+    def __str__(self):
+        context, line, column = self.args
+        error_pointer = ' ' * (column - 2) + '^'
+        return '%s at line %s, column %s.\n\n%s\n%s' % (self.label, line, column, context, error_pointer)
+
 class CsharpSemanticError(Exception):
     pass
 

@@ -1,6 +1,6 @@
 import base64
 from lark import Lark, UnexpectedInput
-from lark.exceptions import UnexpectedToken
+from lark.exceptions import UnexpectedEOF, UnexpectedToken
 from lark.tree import pydot__tree_to_png
 from flask import Flask
 from flask_socketio import SocketIO, emit
@@ -14,7 +14,7 @@ with open('csharp_grammar.lark', 'r') as file:
     grammar = file.read()
 
 # Crea il parser
-parser = Lark(grammar, parser='lalr', start='start')
+parser = Lark(grammar, parser='earley', lexer='basic', debug=True)
 
 # Inizializzazione l'app Flask
 app = Flask(__name__)
@@ -45,30 +45,42 @@ def parse(csharp_code):
     try:
         tree = parser.parse(csharp_code)
         return tree
-    except UnexpectedInput as u:
-        error_line = csharp_code.splitlines()[u.line - 1]
+    except UnexpectedEOF as u:
+        # Controllo specifico per le parentesi graffe in caso di fine inattesa
+        open_braces = csharp_code.count('{')
+        close_braces = csharp_code.count('}')
 
-        # Gestione degli errori specifici in base al tipo di token o contesto
-        if u.token.type in {'NUMBER', 'STRING', 'IDENTIFIER',
-                            'CONSOLE', 'NEW'} and "=" not in error_line and 'EQUAL' in u.expected:
-            raise MissingEqual(error_line, u.line, u.column)
-        elif u.token.type in {'RBRACE', 'CONSOLE', 'IDENTIFIER', 'IF', 'WHILE', 'FOR',
-                              'SWITCH'} and 'SEMICOLON' in u.expected or u.expected == {'SEMICOLON'}:
-            raise MissingSemicolon(error_line, u.line, u.column)
-        elif ("(" in error_line and 'RPAR' in u.expected and csharp_code.count('(') != csharp_code.count(')')) or (csharp_code.count('(') != csharp_code.count(')') and 'RPAR' in u.expected):
-            raise MissingClosingBracketError(error_line, u.line, u.column)
-        elif ("Console" in error_line or ")" in error_line) and u.expected == {'LPAR'}:
-            raise MissingOpeningBracketError(error_line, u.line, u.column)
-        elif 'LSQB' in u.expected and error_line.count('[') < error_line.count(']'):
-            raise MissingOpeningSquareBracketError(error_line, u.line, u.column)
-        elif 'RSQB' in u.expected and error_line.count('[') > error_line.count(']'):
-            raise MissingClosingSquareBracketError(error_line, u.line, u.column)
-        elif csharp_code.count('{') < csharp_code.count('}') or csharp_code.count('{') > csharp_code.count('}') :
-            raise Exception("Check the brackets")
-        else:
-            if error_line.strip() == '{':
-                error_line = csharp_code.splitlines()[u.line - 2]
-            raise CsharpLexicalError(error_line, u.line, u.column)
+        # Se ci sono più graffe aperte rispetto a quelle chiuse, manca una graffa chiusa
+        if open_braces > close_braces:
+            raise MissingClosingClawBracketError(csharp_code.splitlines()[-1], len(csharp_code.splitlines()),
+                                                 len(csharp_code.splitlines()[-1]))
+    except UnexpectedToken as u:
+        error_line = csharp_code.splitlines()[u.line - 1]
+        if error_line.strip() == '{':
+            error_line = csharp_code.splitlines()[u.line - 2]
+            u.line = u.line - 1
+            u.column = len(error_line) + 2
+
+        for rule in u.considered_rules:
+            expect = rule.expect
+            if expect.name == 'RPAR' and csharp_code.count('(') != csharp_code.count(')'):
+                raise MissingClosingBracketError(error_line, u.line, u.column)
+            elif expect.name == 'LPAR' and csharp_code.count('(') != csharp_code.count(')'):
+                raise MissingOpeningBracketError(error_line, u.line, u.column)
+            elif expect.name == 'SEMICOLON':
+                raise MissingSemicolon(error_line, u.line, u.column)
+            elif expect.name == 'EQUAL' and "=" not in error_line:
+                raise MissingEqual(error_line, u.line, u.column)
+            elif expect.name == 'RSQB' and csharp_code.count('[') != csharp_code.count(']'):
+                raise MissingClosingSquareBracketError(error_line, u.line, u.column)
+            elif expect.name == 'LSQB' and csharp_code.count('[') != csharp_code.count(']'):
+                raise MissingOpeningSquareBracketError(error_line, u.line, u.column)
+            elif expect.name == 'RBRACE' and csharp_code.count('{') != csharp_code.count('}'):
+                raise MissingClosingClawBracketError(error_line, u.line, u.column)
+            elif expect.name == 'LBRACE' and csharp_code.count('{') != csharp_code.count('}'):
+                raise MissingOpeningClawBracketError(error_line, u.line, u.column)
+
+        raise CsharpLexicalError(error_line, u.line, u.column)
 
 
 @socketio.on('run_code')

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from lark.visitors import Interpreter, Token, Tree
 from error_handler import *
 
@@ -444,39 +445,49 @@ class CsharpInterpreter(Interpreter):
             'bool': bool
         }
 
-        for i in range(0, len(parameter_list), 2):
-            param_type = parameter_list[i]
-            param_name = parameter_list[i + 1]
-            argument_value = argument_list[i // 2]
+        original_symbol_table = self.csharp_transformer.symbol_table
+        new_symbol_table = deepcopy(original_symbol_table)
+        new_symbol_table.symbols.clear()
+        self.csharp_transformer.symbol_table = new_symbol_table
 
-            expected_type = type_map.get(param_type.children[0], None)
-            if expected_type is None:
-                raise TypeError(f"Unknown parameter type {param_type.children[0]}")
+        try:
+            for i in range(0, len(parameter_list), 2):
+                param_type = parameter_list[i]
+                param_name = parameter_list[i + 1]
+                argument_value = argument_list[i // 2]
 
-            if not isinstance(argument_value, expected_type):
-                raise TypeError(
-                    f"Argument {param_name.value} expected type {expected_type.__name__}, got {type(argument_value).__name__}"
-                )
-            self.csharp_transformer.symbol_table.define(identifier=param_name, symbol_type=param_type, value=argument_value)
+                expected_type = type_map.get(param_type.children[0], None)
+                if expected_type is None:
+                    raise TypeError(f"Unknown parameter type {param_type.children[0]}")
 
-        result = None
+                if not isinstance(argument_value, expected_type):
+                    raise TypeError(
+                        f"Argument {param_name.value} expected type {expected_type.__name__}, got {type(argument_value).__name__}"
+                    )
+                self.csharp_transformer.symbol_table.define(identifier=param_name, symbol_type=param_type, value=argument_value)
 
-        for statement in method_body:
+            result = None
 
-            if isinstance(statement.children[0], Tree) and statement.children[0].data == 'return_statement':
-                result = self.csharp_transformer.transform(statement.children[0])
-                break
-            elif isinstance(statement.children[0], Tree):
-                result = self.csharp_transformer.transform(statement.children[0])
+            for statement in method_body:
 
-        if result is not None:
-            expected_return_type = type_map.get(data_type.children[0].value, None)
-            if expected_return_type is None:
-                raise TypeError(f"Unknown return type {data_type.children[0].value}")
-            if not isinstance(result, expected_return_type):
-                raise TypeError(
-                    f"Return value expected type {expected_return_type.__name__}, got {type(result).__name__}"
-                )
+                if isinstance(statement.children[0], Tree) and statement.children[0].data == 'return_statement':
+                    result = self.csharp_transformer.transform(statement.children[0])
+                    break
+                elif isinstance(statement.children[0], Tree):
+                    result = self.csharp_transformer.transform(statement.children[0])
+
+            if result is not None:
+                expected_return_type = type_map.get(data_type.children[0].value, None)
+                if expected_return_type is None:
+                    raise TypeError(f"Unknown return type {data_type.children[0].value}")
+                if not isinstance(result, expected_return_type):
+                    raise TypeError(
+                        f"Return value expected type {expected_return_type.__name__}, got {type(result).__name__}"
+                    )
+
+        finally:
+            self.csharp_transformer.symbol_table = original_symbol_table
+
 
         return result
 

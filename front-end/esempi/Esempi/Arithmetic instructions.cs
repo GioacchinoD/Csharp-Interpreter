@@ -25,17 +25,18 @@ class Program
         int addition = x + y;
         int multiplication = x * y;
         int division = x / y;
-        int modulo = x % y;
+        int module = x % y;
+
+        // Print the results of the arithmetic operations
+        Console.WriteLine("Addition: " + x + " + " + y + " = " + addition);
+        Console.WriteLine("Subtraction: " + x + " - " + y + " = " + subtraction);
+        Console.WriteLine("Multiplication: " + x + " * " + y + " = " + multiplication);
+        Console.WriteLine("Division: "+ x + " / " + y + " = " + division);
+        Console.WriteLine("Module: " + x + " % " + y + " = " + module);
 
         // Increment the value of x by 1
         x++;
-
-        // Print the results of the arithmetic operations
-        Console.WriteLine("Addition = " + addition);
-        Console.WriteLine("Subtraction = " + subtraction);
-        Console.WriteLine("Multiplication = " + multiplication);
-        Console.WriteLine("Division = " + division);
-        Console.WriteLine("Modulo = " + modulo);
+        
         Console.WriteLine("Increment of variable x = " + x);
     }
 }
