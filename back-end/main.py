@@ -14,7 +14,7 @@ with open('csharp_grammar.lark', 'r') as file:
     grammar = file.read()
 
 # Crea il parser
-parser = Lark(grammar, parser='earley', lexer='basic', debug=True)
+parser = Lark(grammar, parser='earley', lexer='basic', start='start')
 
 # Inizializzazione l'app Flask
 app = Flask(__name__)
@@ -36,10 +36,15 @@ def parse(csharp_code):
     rileva errori di sintassi comuni, sollevando eccezioni specifiche basate sul tipo di errore riscontrato.
 
     :param csharp_code: Una stringa che rappresenta il codice C# da analizzare.
-    :raises MissingEqual: Se manca un simbolo di uguaglianza (=) dove è previsto.
-    :raises MissingSemicolon: Se manca un punto e virgola (;) dove è previsto.
-    :raises MissingClosingBracketError: Se manca una parentesi tonda chiusa ()).
-    :raises MissingOpeningBracketError: Se manca una parentesi tonda aperta (().
+    :raises MissingEqual: Se manca un simbolo di uguaglianza ('=') dove è previsto.
+    :raises MissingSemicolon: Se manca un punto e virgola (';') dove è previsto.
+    :raises MissingClosingBracketError: Se manca una parentesi tonda chiusa (')').
+    :raises MissingOpeningBracketError: Se manca una parentesi tonda aperta ('(').
+    :raises MissingClosingSquareBracketError: Se manca una parentesi quadra chiusa (']').
+    :raises MissingOpeningSquareBracketError: Se manca una parentesi quadra aperta ('[').
+    :raises MissingClosingClawBracketError: Se manca una parentesi graffa  chiusa ('}').
+    :raises MissingOpeningClawBracketError: Se manca una parentesi graffa aperta ('{').
+    :raises CsharpLexicalError: Se non si verifica nessuna delle condizioni precedenti, viene lanciata un eccezione di questo tipo.
     :return: L'albero sintattico generato dal parser se il codice è valido.
     """
     try:
@@ -134,6 +139,10 @@ class Program
     except MissingOpeningSquareBracketError as e:
         emit('error', {'error': f"{str(e)}"})
     except MissingClosingSquareBracketError as e:
+        emit('error', {'error': f"{str(e)}"})
+    except MissingClosingClawBracketError as e:
+        emit('error', {'error': f"{str(e)}"})
+    except MissingOpeningClawBracketError as e:
         emit('error', {'error': f"{str(e)}"})
     except Exception as e:
         emit('error', {'error': f"{str(e)}"})

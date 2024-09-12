@@ -462,7 +462,7 @@ class CsharpInterpreter(Interpreter):
 
                 if not isinstance(argument_value, expected_type):
                     raise TypeError(
-                        f"Argument {param_name.value} expected type {expected_type.__name__}, got {type(argument_value).__name__}"
+                        f"Argument '{param_name.value}' expected type {expected_type.__name__}, got {type(argument_value).__name__}"
                     )
                 self.csharp_transformer.symbol_table.define(identifier=param_name, symbol_type=param_type, value=argument_value)
 
@@ -474,13 +474,15 @@ class CsharpInterpreter(Interpreter):
                     result = self.csharp_transformer.transform(statement.children[0])
                     break
                 elif isinstance(statement.children[0], Tree):
-                    result = self.csharp_transformer.transform(statement.children[0])
+                    result = self.visit(statement.children[0])
 
             if result is not None:
-                expected_return_type = type_map.get(data_type.children[0].value, None)
-                if expected_return_type is None:
-                    raise TypeError(f"Unknown return type {data_type.children[0].value}")
-                if not isinstance(result, expected_return_type):
+                if data_type is None:
+                    raise TypeError(f"Unknown or incompatible return type")
+                else:
+                    expected_return_type = type_map.get(data_type.children[0].value, None)
+
+                if type(result) != expected_return_type:
                     raise TypeError(
                         f"Return value expected type {expected_return_type.__name__}, got {type(result).__name__}"
                     )
